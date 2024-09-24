@@ -1,6 +1,6 @@
-# Nature's Palette
+# GCIN4001
 
-Nature's Palette is a research application built with Streamlit to study how color code conversions impact the perception of natural objects.
+This is a research application built with Streamlit to study how color code conversions impact the perception of natural objects.
 
 ## Features
 
@@ -14,4 +14,4 @@ Nature's Palette is a research application built with Streamlit to study how col
 1. **Clone the repository:**
 
    ```bash
-   git clone https://github.com/yourusername/natures-palette.git
+   git clone https://github.com/ay0219/gcin4001.git
