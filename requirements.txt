@@ -1,6 +1,8 @@
-streamlit
+streamlit>=1.12.0
 pandas
 numpy
-Pillow
-colormath
+Pillow>=9.1.0
 matplotlib
+streamlit-image-select
+google-cloud-firestore
+google-auth
