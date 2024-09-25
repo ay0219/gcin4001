@@ -14,6 +14,9 @@ import json
 from google.oauth2 import service_account
 from google.cloud import firestore
 
+# For downloading chart image
+from io import BytesIO
+
 # Set page configuration
 st.set_page_config(page_title="Nature's Palette", layout="wide")
 
@@ -25,6 +28,20 @@ hide_st_style = """
             </style>
             """
 st.markdown(hide_st_style, unsafe_allow_html=True)
+
+# Add CSS to fix image scaling
+st.markdown(
+    """
+    <style>
+    img[data-baseweb="image"] {
+        object-fit: contain !important;
+        width: 100% !important;
+        height: auto !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
 # Header
 st.title("Nature's Palette: Exploring Color Perception")
@@ -57,23 +74,27 @@ db = firestore.Client(credentials=credentials, project=key_dict["project_id"])
 
 # Function to save responses to Firestore
 def save_responses_to_firestore(responses_list):
-    for record in responses_list:
-        try:
-            # Prepare the document data
-            doc_ref = db.collection('responses').document()  # Auto-generates a unique ID
-            doc_ref.set({
-                'user_id': record['user_id'],
-                'task_index': record['task_index'],
-                'object': record['object'],
-                'repeat': record['repeat'],
-                'selected_option': record['selected_option'],
-                'selected_color_space': record['selected_color_space'],
-                'option_1_color_space': record['option_1_color_space'],
-                'option_2_color_space': record['option_2_color_space'],
-                'option_3_color_space': record['option_3_color_space'],
-            })
-        except Exception as e:
-            st.error(f"Error saving to Firestore: {e}")
+    try:
+        user_id = responses_list[0]['user_id']
+        user_collection = db.collection(user_id)
+        
+        # Organize responses by object
+        object_responses = {}
+        for record in responses_list:
+            obj = record['object']
+            attempt = record['repeat']
+            selected_color_space = record['selected_color_space']
+            
+            if obj not in object_responses:
+                object_responses[obj] = {}
+            object_responses[obj][f'attempt_{attempt}'] = selected_color_space
+        
+        # Save each object's responses
+        for obj, attempts in object_responses.items():
+            doc_ref = user_collection.document(obj)
+            doc_ref.set(attempts)
+    except Exception as e:
+        st.error(f"Error saving to Firestore: {e}")
 
 # Load images
 def load_image(image_path):
@@ -176,7 +197,7 @@ if st.session_state.current_task_index < total_tasks:
     rng.shuffle(images_with_formats)
 
     # Prepare images and captions for selection
-    images = [img for _, img in images_with_formats]
+    images = [img.resize((400, 400)) for _, img in images_with_formats]  # Resize images for consistency
     captions = [f"Option {i+1}" for i in range(len(images))]
     color_spaces_shuffled = [cs for cs, _ in images_with_formats]
 
@@ -244,12 +265,27 @@ if st.session_state.current_task_index < total_tasks:
 
                     st.subheader("Summary of Your Preferences:")
                     preference_counts = responses_df['selected_color_space'].value_counts()
-                    fig, ax = plt.subplots()
+                    fig, ax = plt.subplots(figsize=(8,6))
                     preference_counts.plot(kind='bar', ax=ax)
                     ax.set_xlabel('Color Space')
                     ax.set_ylabel('Number of Selections')
                     ax.set_title('Your Color Space Preferences')
+
+                    # Display the chart
                     st.pyplot(fig)
+
+                    # Save the chart to a buffer
+                    buf = BytesIO()
+                    fig.savefig(buf, format='png')
+                    buf.seek(0)
+
+                    # Provide download button for the chart image
+                    st.download_button(
+                        label="Download Chart as PNG",
+                        data=buf,
+                        file_name='your_preferences_chart.png',
+                        mime='image/png',
+                    )
 
                     # Provide download option for participant's own data
                     csv_data = responses_df.to_csv(index=False).encode('utf-8')
@@ -280,12 +316,27 @@ else:
 
         st.subheader("Summary of Your Preferences:")
         preference_counts = responses_df['selected_color_space'].value_counts()
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots(figsize=(8,6))
         preference_counts.plot(kind='bar', ax=ax)
         ax.set_xlabel('Color Space')
         ax.set_ylabel('Number of Selections')
         ax.set_title('Your Color Space Preferences')
+
+        # Display the chart
         st.pyplot(fig)
+
+        # Save the chart to a buffer
+        buf = BytesIO()
+        fig.savefig(buf, format='png')
+        buf.seek(0)
+
+        # Provide download button for the chart image
+        st.download_button(
+            label="Download Chart as PNG",
+            data=buf,
+            file_name='your_preferences_chart.png',
+            mime='image/png',
+        )
 
         # Provide download option for participant's own data
         csv_data = responses_df.to_csv(index=False).encode('utf-8')
