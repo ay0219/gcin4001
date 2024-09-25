@@ -29,20 +29,6 @@ hide_st_style = """
             """
 st.markdown(hide_st_style, unsafe_allow_html=True)
 
-# Add CSS to fix image scaling
-st.markdown(
-    """
-    <style>
-    img[data-baseweb="image"] {
-        object-fit: contain !important;
-        width: 100% !important;
-        height: auto !important;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
-
 # Header
 st.title("Nature's Palette: Exploring Color Perception")
 
@@ -197,25 +183,30 @@ if st.session_state.current_task_index < total_tasks:
     rng.shuffle(images_with_formats)
 
     # Prepare images and captions for selection
-    images = [img.resize((400, 400)) for _, img in images_with_formats]  # Resize images for consistency
+    images = [img for _, img in images_with_formats]
     captions = [f"Option {i+1}" for i in range(len(images))]
     color_spaces_shuffled = [cs for cs, _ in images_with_formats]
+    
+    # Allow images to be expandable
+    st.write("Please select the image you like the most:")
+    enlarged_images = []
+    for idx, img in enumerate(images):
+        with st.expander(f"View Option {idx+1}", expanded=False):
+            st.image(img, use_column_width=True)
+        enlarged_images.append(img)
 
     # Allow participant to select image by clicking on it
-    with st.container():
-        st.write("Please select the image you like the most:")
-        try:
-            selected_idx = image_select(
-                label="",
-                images=images,
-                captions=captions,
-                use_container_width=True,
-                return_value='index',
-                key=f"selection_{st.session_state.current_task_index}"
-            )
-        except Exception as e:
-            st.error(f"Error with image selection: {e}")
-            st.stop()
+    try:
+        selected_idx = image_select(
+            label="",
+            images=images,
+            captions=captions,
+            return_value='index',
+            key=f"selection_{st.session_state.current_task_index}"
+        )
+    except Exception as e:
+        st.error(f"Error with image selection: {e}")
+        st.stop()
 
     # Ensure a selection is made
     if selected_idx is None:
@@ -226,7 +217,7 @@ if st.session_state.current_task_index < total_tasks:
     record_response(selected_idx)
 
     # Navigation buttons
-    col1, col2, col3 = st.columns([1, 6, 1])
+    col1, col2 = st.columns(2)
     with col1:
         if st.session_state.current_task_index > 0:
             if st.button("Previous"):
@@ -236,8 +227,6 @@ if st.session_state.current_task_index < total_tasks:
                     st.session_state.responses.pop()
                 st.rerun()
     with col2:
-        pass  # Empty column for spacing
-    with col3:
         if st.session_state.current_task_index < total_tasks - 1:
             if st.button("Next"):
                 st.session_state.current_task_index += 1
@@ -257,44 +246,41 @@ if st.session_state.current_task_index < total_tasks:
                 st.session_state.clear()
 
                 # Display participant's own data
-                with st.container():
-                    st.header("Your Selections and Preferences")
+                st.header("Your Selections and Preferences")
 
-                    st.subheader("Your Selections:")
-                    st.dataframe(responses_df[['task_index', 'object', 'repeat', 'selected_color_space']])
+                st.subheader("Your Selections:")
+                st.dataframe(responses_df[['task_index', 'object', 'repeat', 'selected_color_space']], use_container_width=True)
 
-                    st.subheader("Summary of Your Preferences:")
-                    preference_counts = responses_df['selected_color_space'].value_counts()
-                    fig, ax = plt.subplots(figsize=(8,6))
-                    preference_counts.plot(kind='bar', ax=ax)
-                    ax.set_xlabel('Color Space')
-                    ax.set_ylabel('Number of Selections')
-                    ax.set_title('Your Color Space Preferences')
+                st.subheader("Summary of Your Preferences:")
+                preference_counts = responses_df['selected_color_space'].value_counts()
+                fig, ax = plt.subplots(figsize=(10,6))
+                preference_counts.plot(kind='bar', ax=ax)
+                ax.set_xlabel('Color Space')
+                ax.set_ylabel('Number of Selections')
+                ax.set_title('Your Color Space Preferences')
+                st.pyplot(fig)
 
-                    # Display the chart
-                    st.pyplot(fig)
+                # Save the chart to a buffer
+                buf = BytesIO()
+                fig.savefig(buf, format='png')
+                buf.seek(0)
 
-                    # Save the chart to a buffer
-                    buf = BytesIO()
-                    fig.savefig(buf, format='png')
-                    buf.seek(0)
+                # Provide download button for the chart image
+                st.download_button(
+                    label="Download Chart as PNG",
+                    data=buf,
+                    file_name='your_preferences_chart.png',
+                    mime='image/png',
+                )
 
-                    # Provide download button for the chart image
-                    st.download_button(
-                        label="Download Chart as PNG",
-                        data=buf,
-                        file_name='your_preferences_chart.png',
-                        mime='image/png',
-                    )
-
-                    # Provide download option for participant's own data
-                    csv_data = responses_df.to_csv(index=False).encode('utf-8')
-                    st.download_button(
-                        label="Download Your Responses as CSV",
-                        data=csv_data,
-                        file_name='your_responses.csv',
-                        mime='text/csv',
-                    )
+                # Provide download option for participant's own data
+                csv_data = responses_df.to_csv(index=False).encode('utf-8')
+                st.download_button(
+                    label="Download Your Responses as CSV",
+                    data=csv_data,
+                    file_name='your_responses.csv',
+                    mime='text/csv',
+                )
 
                 st.stop()
 else:
@@ -308,43 +294,40 @@ else:
     st.session_state.clear()
 
     # Display participant's own data
-    with st.container():
-        st.header("Your Selections and Preferences")
+    st.header("Your Selections and Preferences")
 
-        st.subheader("Your Selections:")
-        st.dataframe(responses_df[['task_index', 'object', 'repeat', 'selected_color_space']])
+    st.subheader("Your Selections:")
+    st.dataframe(responses_df[['task_index', 'object', 'repeat', 'selected_color_space']], use_container_width=True)
 
-        st.subheader("Summary of Your Preferences:")
-        preference_counts = responses_df['selected_color_space'].value_counts()
-        fig, ax = plt.subplots(figsize=(8,6))
-        preference_counts.plot(kind='bar', ax=ax)
-        ax.set_xlabel('Color Space')
-        ax.set_ylabel('Number of Selections')
-        ax.set_title('Your Color Space Preferences')
+    st.subheader("Summary of Your Preferences:")
+    preference_counts = responses_df['selected_color_space'].value_counts()
+    fig, ax = plt.subplots(figsize=(10,6))
+    preference_counts.plot(kind='bar', ax=ax)
+    ax.set_xlabel('Color Space')
+    ax.set_ylabel('Number of Selections')
+    ax.set_title('Your Color Space Preferences')
+    st.pyplot(fig)
 
-        # Display the chart
-        st.pyplot(fig)
+    # Save the chart to a buffer
+    buf = BytesIO()
+    fig.savefig(buf, format='png')
+    buf.seek(0)
 
-        # Save the chart to a buffer
-        buf = BytesIO()
-        fig.savefig(buf, format='png')
-        buf.seek(0)
+    # Provide download button for the chart image
+    st.download_button(
+        label="Download Chart as PNG",
+        data=buf,
+        file_name='your_preferences_chart.png',
+        mime='image/png',
+    )
 
-        # Provide download button for the chart image
-        st.download_button(
-            label="Download Chart as PNG",
-            data=buf,
-            file_name='your_preferences_chart.png',
-            mime='image/png',
-        )
-
-        # Provide download option for participant's own data
-        csv_data = responses_df.to_csv(index=False).encode('utf-8')
-        st.download_button(
-            label="Download Your Responses as CSV",
-            data=csv_data,
-            file_name='your_responses.csv',
-            mime='text/csv',
-        )
+    # Provide download option for participant's own data
+    csv_data = responses_df.to_csv(index=False).encode('utf-8')
+    st.download_button(
+        label="Download Your Responses as CSV",
+        data=csv_data,
+        file_name='your_responses.csv',
+        mime='text/csv',
+    )
 
     st.stop()
