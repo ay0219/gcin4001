@@ -156,7 +156,7 @@ if not st.session_state.consent_given:
     consent = show_consent_form()
     if consent:
         st.session_state.consent_given = True
-        st.experimental_rerun()  # Reload the app to proceed
+        st.rerun()  # Reload the app to proceed
     else:
         st.stop()  # Stop the app until consent is given
 
@@ -264,12 +264,12 @@ if st.session_state.consent_given:
                     # Remove the last response
                     if st.session_state.responses:
                         st.session_state.responses.pop()
-                    st.experimental_rerun()
+                    st.rerun()
         with col2:
             if st.session_state.current_task_index < total_tasks - 1:
                 if st.button("Next"):
                     st.session_state.current_task_index += 1
-                    st.experimental_rerun()
+                    st.rerun()
             else:
                 if st.button("Submit"):
                     # Save responses to Firestore
