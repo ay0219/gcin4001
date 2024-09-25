@@ -230,7 +230,7 @@ if st.session_state.consent_given:
         captions = [f"Option {i+1}" for i in range(len(images))]
         color_spaces_shuffled = [cs for cs, _ in images_with_formats]
 
-        # Allow participant to view images in larger size
+        # Allow participant to select image by clicking on it
         st.write("Please select the image you like the most:")
         selected_idx = image_select(
             label="",
@@ -241,10 +241,10 @@ if st.session_state.consent_given:
             key=f"selection_{st.session_state.current_task_index}"
         )
 
-        # Provide option to view each image separately
+        # Provide option to view each image separately without revealing color format
         with st.expander("View Images in Full Size"):
             for idx, img in enumerate(images):
-                st.subheader(f"Option {idx+1} - {color_spaces_shuffled[idx]}")
+                st.subheader(f"Option {idx+1}")
                 st.image(img, use_column_width=True)
 
         # Ensure a selection is made
