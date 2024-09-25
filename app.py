@@ -32,17 +32,38 @@ st.markdown(hide_st_style, unsafe_allow_html=True)
 # Header
 st.title("Nature's Palette: Exploring Color Perception")
 
-st.write("""
-Welcome to the Nature's Palette study!
+# Consent Form
+def show_consent_form():
+    st.header("Participant Consent Form")
+    consent_text = """
+    **Study Title:** Nature's Palette: Exploring Color Perception
 
-In this study, you will see different visual representations of natural objects. Each object is displayed three times with different color formats shuffled randomly. Your task is to select the image you like the most each time.
+    **Researcher:** [Your Name], [Your Institution or Department]
 
-Please note that your participation is anonymous, and your responses will be used solely for research purposes.
+    **Purpose of the Study:**
+    The purpose of this study is to investigate how different color formats (CMYK, Pantone, RGB) impact the perception of natural objects. Your participation will contribute to a better understanding of color perception and its applications in design and visual arts.
 
-Let's begin!
-""")
+    **Procedures:**
+    You will be shown images of natural objects presented in different color formats. Your task is to select the image you perceive as the most accurate or appealing for each object.
+
+    **Confidentiality and Data Usage:**
+    Your responses will be recorded anonymously. No personally identifiable information will be collected. The data gathered will be used solely for research purposes and may be published in academic journals or conferences in an aggregated form.
+
+    **Voluntary Participation:**
+    Your participation is voluntary. You may withdraw from the study at any time by closing the browser window without any penalty.
+
+    **Agreement:**
+    By checking the box below, you acknowledge that you have read and understood the information provided above and agree to participate in this study.
+    """
+    st.markdown(consent_text)
+    consent_given = st.checkbox("I have read the above information and consent to participate in this study.")
+
+    return consent_given
 
 # Initialize session state variables
+if 'consent_given' not in st.session_state:
+    st.session_state.consent_given = False
+
 if 'responses' not in st.session_state:
     st.session_state.responses = []
 
@@ -130,6 +151,14 @@ def record_response(selected_idx):
         'option_3_color_space': color_spaces_shuffled[2],
     })
 
+# Consent Step
+if not st.session_state.consent_given:
+    consent = show_consent_form()
+    if consent:
+        st.session_state.consent_given = True
+    else:
+        st.stop()  # Stop the app until consent is given
+
 # List of objects
 object_images = [f for f in os.listdir('data/objects') if f.lower().endswith(('.jpg', '.jpeg', '.png'))]
 
@@ -187,15 +216,8 @@ if st.session_state.current_task_index < total_tasks:
     captions = [f"Option {i+1}" for i in range(len(images))]
     color_spaces_shuffled = [cs for cs, _ in images_with_formats]
     
-    # Allow images to be expandable
-    st.write("Please select the image you like the most:")
-    enlarged_images = []
-    for idx, img in enumerate(images):
-        with st.expander(f"View Option {idx+1}", expanded=False):
-            st.image(img, use_column_width=True)
-        enlarged_images.append(img)
-
     # Allow participant to select image by clicking on it
+    st.write("Please select the image you like the most:")
     try:
         selected_idx = image_select(
             label="",
