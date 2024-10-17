@@ -41,10 +41,10 @@ def show_consent_form():
     **Principal Investigator:** Mr. Yau, u3584220@connect.hku.hk, School of Modern Languages and Cultures
 
     **Purpose of the Study:**
-    This study investigates how different color formats (CMYK, Pantone, RGB) influence preferences for images of everyday objects and scenes. Your participation will contribute to a better understanding of color perception and its role in visual design.
+    This study investigates how different color formats (CMYK, Pantone, RGB) influence preferences for symbolic images of object or scene. Your participation will contribute to a better understanding of color perception and its role in visual design.
 
     **Procedures:**
-    You will be shown sets of images, each depicting the same object or scene in different color formats. Your task is simply to select the image from each set that you find most visually appealing.
+    You will complete 12 trials, consisting of 4 sets of images presented three times each. Each set contains the same image in three different color formats. Your task is to select the image you find most visually appealing in each trial. The order of images within each set will be randomized for each of the three presentations.
 
     **Confidentiality and Data Usage:**
     Your responses will be recorded anonymously. No personally identifiable information will be collected. Aggregated data may be presented in academic publications or conferences.
