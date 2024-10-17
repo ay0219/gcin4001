@@ -34,7 +34,7 @@ st.title("GCIN4001 Capstone Research Project: A Study of Color and Preference")
 
 # Consent Form
 def show_consent_form():
-    st.header("Participant Consent Form")
+    st.header("Inform Consent Form for Participants")
     consent_text = """
     **Study Title:** GCIN4001 Capstone Research Project: A Study of Color and Preference
 
@@ -164,11 +164,12 @@ if not st.session_state.consent_given:
 if st.session_state.consent_given:
     # Introduction text
     st.write("""
-    Welcome to the Nature's Palette study!
 
-    In this study, you will see different visual representations of natural objects. Each object is displayed three times with different color formats shuffled randomly. Your task is to select the image you like the most each time.
+    You're ready to begin!
+    
+    In this study, you will be presented with sets of images. Each set features variations in color formatting. Your task is to select the image from each set that you find most visually appealing. The images within each set will be presented in a random order.
 
-    Please note that your participation is anonymous, and your responses will be used solely for research purposes.
+    Your responses will remain completely anonymous and will be used solely for research purposes.
 
     Let's begin!
     """)
