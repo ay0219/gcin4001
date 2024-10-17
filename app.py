@@ -30,33 +30,33 @@ hide_st_style = """
 st.markdown(hide_st_style, unsafe_allow_html=True)
 
 # Header
-st.title("Nature's Palette: Exploring Color Perception")
+st.title("GCIN4001 Capstone Research Project: A Study of Color and Preference")
 
 # Consent Form
 def show_consent_form():
     st.header("Participant Consent Form")
     consent_text = """
-    **Study Title:** Nature's Palette: Exploring Color Perception
+    **Study Title:** GCIN4001 Capstone Research Project: A Study of Color and Preference
 
-    **Researcher:** [Your Name], [Your Institution or Department]
+    **Principal Investigator:** Mr. Yau, u3584220@connect.hku.hk, School of Modern Languages and Cultures
 
     **Purpose of the Study:**
-    The purpose of this study is to investigate how different color formats (CMYK, Pantone, RGB) impact the perception of natural objects. Your participation will contribute to a better understanding of color perception and its applications in design and visual arts.
+    This study investigates how different color formats (CMYK, Pantone, RGB) influence preferences for images of everyday objects and scenes. Your participation will contribute to a better understanding of color perception and its role in visual design.
 
     **Procedures:**
-    You will be shown images of natural objects presented in different color formats. Your task is to select the image you perceive as the most accurate or appealing for each object.
+    You will be shown sets of images, each depicting the same object or scene in different color formats. Your task is simply to select the image from each set that you find most visually appealing.
 
     **Confidentiality and Data Usage:**
-    Your responses will be recorded anonymously. No personally identifiable information will be collected. The data gathered will be used solely for research purposes and may be published in academic journals or conferences in an aggregated form.
+    Your responses will be recorded anonymously. No personally identifiable information will be collected. Aggregated data may be presented in academic publications or conferences.
 
     **Voluntary Participation:**
-    Your participation is voluntary. You may withdraw from the study at any time by closing the browser window without any penalty.
+    Your participation is entirely voluntary. You may withdraw at any time by closing your browser window.
 
     **Agreement:**
     By checking the box below, you acknowledge that you have read and understood the information provided above and agree to participate in this study.
     """
     st.markdown(consent_text)
-    consent_given = st.checkbox("I have read the above information and consent to participate in this study.")
+    consent_given = st.checkbox("I have read and understood the information above and agree to participate.")
 
     return consent_given
 
