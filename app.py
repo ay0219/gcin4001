@@ -34,7 +34,7 @@ st.title("GCIN4001 Capstone Research Project: A Study of Color and Preference")
 
 # Consent Form
 def show_consent_form():
-    st.header("Inform Consent Form for Participants")
+    st.header("Informed Consent Form for Participants")
     consent_text = """
     **Study Title:** GCIN4001 Capstone Research Project: A Study of Color and Preference
 
