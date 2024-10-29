@@ -341,8 +341,8 @@ if st.session_state.consent_given:
         # Prepare responses DataFrame
         responses_df = pd.DataFrame.from_dict(st.session_state.responses, orient='index')
 
-        # Optionally rename columns for clarity
-        responses_df = responses_df.rename(columns={'task_index': 'Trial Number', 'object': 'Object', 'selected_color_space': 'Selected Color Space'})
+        # Clear session state after submission
+        st.session_state.clear()
 
         # Display participant's own data
         st.header("Your Selections and Preferences")
