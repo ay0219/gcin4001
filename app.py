@@ -345,48 +345,32 @@ if st.session_state.consent_given:
         # Note: Do not clear session state yet, as we need data
 
         # Display participant's own data
-        st.header("Your Selections and Preferences")
+        st.header("Your Selections")
 
-        # For each response, display the images and highlight the selected one
+        # For each response, display the selected image
         for index, row in responses_df.iterrows():
             st.subheader(f"Task {row['task_index']} - {os.path.splitext(row['object'])[0].capitalize()} (Repeat {row['repeat']}/3)")
-
+            
             # Load original image
             image_path = f'data/objects/{row["object"]}'
             original_image = load_image(image_path)
             if original_image is None:
                 st.error(f"Could not load image {row['object']}.")
                 continue
-
-            # Get the color spaces and images in the order they were presented
-            option_color_spaces = [
-                row['option_1_color_space'],
-                row['option_2_color_space'],
-                row['option_3_color_space'],
-            ]
-
-            images = []
-            captions = []
-            for i, cs in enumerate(option_color_spaces):
-                img_converted = convert_image_colors(original_image.copy(), cs)
-                images.append(img_converted)
-                # Build caption
-                if (i + 1) == row['selected_option']:
-                    caption = f"Option {i + 1}: {cs} ✅"
-                else:
-                    caption = f"Option {i + 1}: {cs}"
-                captions.append(caption)
-
-            # Display images with selection indication
-            cols = st.columns(len(images))
-            for i, col in enumerate(cols):
-                with col:
-                    st.image(images[i], use_column_width=True, caption=captions[i])
-
+            
+            # Get the selected color space
+            selected_color_space = row['selected_color_space']
+            
+            # Convert the original image to the selected color space
+            selected_image = convert_image_colors(original_image.copy(), selected_color_space)
+            
+            # Display the selected image with caption
+            st.image(selected_image, use_column_width=True, caption=f"Your Selection: {selected_color_space}")
+        
         # Proceed with summary
         st.subheader("Summary of Your Preferences:")
         preference_counts = responses_df['selected_color_space'].value_counts()
-        fig, ax = plt.subplots(figsize=(10, 6))
+        fig, ax = plt.subplots(figsize=(10,6))
         preference_counts.plot(kind='bar', ax=ax, color='skyblue')
         ax.set_xlabel('Color Space')
         ax.set_ylabel('Number of Selections')
