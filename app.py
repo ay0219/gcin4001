@@ -36,7 +36,7 @@ def show_consent_form():
     consent_text = """
     **Study Title:** Nature's Palette: Exploring Color Perception
 
-    **Researcher:** [Your Name], [Your Institution or Department]
+    **Researcher:** Mr. Yau, u3584220@connect.hku.hk, School of Modern Languages and Cultures
 
     **Purpose of the Study:**
     The purpose of this study is to investigate how different color formats (CMYK, eciRGB v2, RGB) impact the perception of natural objects. Your participation will contribute to a better understanding of color perception and its applications in design and visual arts.
