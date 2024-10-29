@@ -298,10 +298,8 @@ if st.session_state.consent_given:
 
                     # Display participant's own data
                     st.header("Your Selections and Preferences")
-
-                    st.subheader("Your Selections:")
-                    st.dataframe(responses_df[['task_index', 'object', 'repeat', 'selected_color_space']], use_container_width=True)
-
+                        
+                        # Proceed with summary
                     st.subheader("Summary of Your Preferences:")
                     preference_counts = responses_df['selected_color_space'].value_counts()
                     fig, ax = plt.subplots(figsize=(10,6))
@@ -345,29 +343,10 @@ if st.session_state.consent_given:
         # Note: Do not clear session state yet, as we need data
 
         # Display participant's own data
-        st.header("Your Selections")
+        st.header("Your Selections and Preferences")
 
-        # For each response, display the selected image
-        for index, row in responses_df.iterrows():
-            st.subheader(f"Task {row['task_index']} - {os.path.splitext(row['object'])[0].capitalize()} (Repeat {row['repeat']}/3)")
-            
-            # Load original image
-            image_path = f'data/objects/{row["object"]}'
-            original_image = load_image(image_path)
-            if original_image is None:
-                st.error(f"Could not load image {row['object']}.")
-                continue
-            
-            # Get the selected color space
-            selected_color_space = row['selected_color_space']
-            
-            # Convert the original image to the selected color space
-            selected_image = convert_image_colors(original_image.copy(), selected_color_space)
-            
-            # Display the selected image with caption
-            st.image(selected_image, use_column_width=True, caption=f"Your Selection: {selected_color_space}")
-        
-        # Proceed with summary
+        # Removed the table and image display
+
         st.subheader("Summary of Your Preferences:")
         preference_counts = responses_df['selected_color_space'].value_counts()
         fig, ax = plt.subplots(figsize=(10,6))
