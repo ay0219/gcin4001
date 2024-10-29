@@ -335,7 +335,6 @@ if st.session_state.consent_given:
 
                     st.stop()
     else:
-# You have completed the study.
     st.success("You have completed the study. Thank you for your participation!")
     st.balloons()
 
