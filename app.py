@@ -339,16 +339,16 @@ if st.session_state.consent_given:
         st.balloons()
 
         # Prepare responses DataFrame
-        responses_df = pd.DataFrame(st.session_state.responses)
+        responses_df = pd.DataFrame.from_dict(st.session_state.responses, orient='index')
 
-        # Clear session state after submission
-        st.session_state.clear()
+        # Optionally rename columns for clarity
+        responses_df = responses_df.rename(columns={'task_index': 'Trial Number', 'object': 'Object', 'selected_color_space': 'Selected Color Space'})
 
         # Display participant's own data
         st.header("Your Selections and Preferences")
 
         st.subheader("Your Selections:")
-        st.dataframe(responses_df[['task_index', 'object', 'repeat', 'selected_color_space']], use_container_width=True)
+        st.dataframe(responses_df[['Trial Number', 'Object', 'Selected Color Space']], use_container_width=True)
 
         st.subheader("Summary of Your Preferences:")
         preference_counts = responses_df['selected_color_space'].value_counts()
