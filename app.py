@@ -370,5 +370,5 @@ if st.session_state.consent_given:
 
         # Now clear session state
         st.session_state.clear()
-
+        )
         st.stop()
