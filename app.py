@@ -28,21 +28,21 @@ hide_st_style = """
 st.markdown(hide_st_style, unsafe_allow_html=True)
 
 # Header
-st.title("Nature's Palette: Exploring Color Perception")
+st.title("GCIN4001 Capstone Research Project: A Study of Color and Preference")
 
 # Consent Form
 def show_consent_form():
     st.header("Participant Consent Form")
     consent_text = """
-    **Study Title:** Nature's Palette: Exploring Color Perception
+    **Study Title:** GCIN4001 Capstone Research Project: A Study of Color and Preference
 
-    **Researcher:** Mr. Yau, u3584220@connect.hku.hk, School of Modern Languages and Cultures
+    **Principal Investigator:** Mr. Yau, u3584220@connect.hku.hk, School of Modern Languages and Cultures
 
     **Purpose of the Study:**
     The purpose of this study is to investigate how different color formats (CMYK, eciRGB v2, RGB) impact the perception of natural objects. Your participation will contribute to a better understanding of color perception and its applications in design and visual arts.
 
     **Procedures:**
-    You will be shown images of natural objects presented in different color formats. Your task is to select the image you perceive as the most accurate or appealing for each object.
+    You will complete 15 trials, consisting of FIVE sets of images presented THREE times each. Each set contains the same image in three different color formats. Your task is to select the image you find most visually appealing in each trial. The order of images within each set will be randomized for each of the three presentations.
 
     **Confidentiality and Data Usage:**
     Your responses will be recorded anonymously. No personally identifiable information will be collected. The data gathered will be used solely for research purposes and may be published in academic journals or conferences in an aggregated form.
@@ -166,11 +166,11 @@ if not st.session_state.consent_given:
 if st.session_state.consent_given:
     # Introduction text
     st.write("""
-    Welcome to the Nature's Palette study!
+    You're ready to begin!
+    
+    In this study, you will be presented with sets of images. Each set features variations in color formatting. Your task is to select the image from each set that you find most visually appealing. The images within each set will be presented in a random order.
 
-    In this study, you will see different visual representations of natural objects. Each object is displayed three times with different color formats shuffled randomly. Your task is to select the image you like the most each time.
-
-    Please note that your participation is anonymous, and your responses will be used solely for research purposes.
+    Your responses will remain completely anonymous and will be used solely for research purposes.
 
     Let's begin!
     """)
@@ -211,7 +211,7 @@ if st.session_state.consent_given:
         # Load original image
         image = load_image(f'data/objects/{obj_image}')
         if image is None:
-            st.error(f"Could not load image {obj_image}. Please contact the administrator.")
+            st.error(f"Could not load image {obj_image}. Please contact the Principal Investigator.")
             st.stop()
 
         # Generate different color versions
@@ -233,7 +233,7 @@ if st.session_state.consent_given:
         color_spaces_shuffled = [cs for cs, _ in images_with_formats]
 
         # Allow participant to select image by clicking on it
-        st.write("Please select the image you like the most:")
+        st.write("Take a moment to look closely at each image. Then, please select the one you prefer:")
         selected_idx = image_select(
             label="",
             images=images,
