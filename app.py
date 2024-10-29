@@ -358,36 +358,35 @@ if st.session_state.consent_given:
                 st.error(f"Could not load image {row['object']}.")
                 continue
 
-            # Get the color spaces in the order they were presented
+            # Get the color spaces and images in the order they were presented
             option_color_spaces = [
                 row['option_1_color_space'],
                 row['option_2_color_space'],
                 row['option_3_color_space'],
             ]
 
-            # Generate images with corresponding color spaces
             images = []
-            for cs in option_color_spaces:
+            captions = []
+            for i, cs in enumerate(option_color_spaces):
                 img_converted = convert_image_colors(original_image.copy(), cs)
                 images.append(img_converted)
+                # Build caption
+                if (i + 1) == row['selected_option']:
+                    caption = f"Option {i + 1}: {cs} ✅"
+                else:
+                    caption = f"Option {i + 1}: {cs}"
+                captions.append(caption)
 
             # Display images with selection indication
-            cols = st.columns(3)
+            cols = st.columns(len(images))
             for i, col in enumerate(cols):
                 with col:
-                    # Display image
-                    st.image(images[i], use_column_width=True)
-                    # Check if this option was selected
-                    if (i + 1) == row['selected_option']:
-                        # Use a checkmark emoji to indicate selected image
-                        st.markdown(f"**Option {i + 1} ✅**")
-                    else:
-                        st.markdown(f"Option {i + 1}")
+                    st.image(images[i], use_column_width=True, caption=captions[i])
 
         # Proceed with summary
         st.subheader("Summary of Your Preferences:")
         preference_counts = responses_df['selected_color_space'].value_counts()
-        fig, ax = plt.subplots(figsize=(10,6))
+        fig, ax = plt.subplots(figsize=(10, 6))
         preference_counts.plot(kind='bar', ax=ax, color='skyblue')
         ax.set_xlabel('Color Space')
         ax.set_ylabel('Number of Selections')
