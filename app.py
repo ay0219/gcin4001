@@ -321,16 +321,6 @@ if st.session_state.consent_given:
                         file_name='your_preferences_chart.png',
                         mime='image/png',
                     )
-
-                    # Provide download option for participant's own data
-                    csv_data = responses_df.to_csv(index=False).encode('utf-8')
-                    st.download_button(
-                        label="Download Your Responses as CSV",
-                        data=csv_data,
-                        file_name='your_responses.csv',
-                        mime='text/csv',
-                    )
-
                     st.stop()
     else:
         # You have completed the study.
