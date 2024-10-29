@@ -5,7 +5,8 @@ import os
 import random
 import uuid
 import matplotlib.pyplot as plt
-from PIL import Image
+from PIL import Image, ImageCms
+from io import BytesIO
 
 from streamlit_image_select import image_select
 
@@ -13,9 +14,6 @@ from streamlit_image_select import image_select
 import json
 from google.oauth2 import service_account
 from google.cloud import firestore
-
-# For downloading chart image
-from io import BytesIO
 
 # Set page configuration
 st.set_page_config(page_title="Nature's Palette", layout="wide")
@@ -30,33 +28,33 @@ hide_st_style = """
 st.markdown(hide_st_style, unsafe_allow_html=True)
 
 # Header
-st.title("GCIN4001 Capstone Research Project: A Study of Color and Preference")
+st.title("Nature's Palette: Exploring Color Perception")
 
 # Consent Form
 def show_consent_form():
-    st.header("Informed Consent Form for Participants")
+    st.header("Participant Consent Form")
     consent_text = """
-    **Study Title:** GCIN4001 Capstone Research Project: A Study of Color and Preference
+    **Study Title:** Nature's Palette: Exploring Color Perception
 
-    **Principal Investigator:** Mr. Yau, u3584220@connect.hku.hk, School of Modern Languages and Cultures
+    **Researcher:** [Your Name], [Your Institution or Department]
 
     **Purpose of the Study:**
-    This study investigates how different color formats (CMYK, Pantone, RGB) influence preferences for symbolic images of object or scene. Your participation will contribute to a better understanding of color perception and its role in visual design.
+    The purpose of this study is to investigate how different color formats (CMYK, eciRGB v2, RGB) impact the perception of natural objects. Your participation will contribute to a better understanding of color perception and its applications in design and visual arts.
 
     **Procedures:**
-    You will complete 12 trials, consisting of 4 sets of images presented three times each. Each set contains the same image in three different color formats. Your task is to select the image you find most visually appealing in each trial. The order of images within each set will be randomized for each of the three presentations.
+    You will be shown images of natural objects presented in different color formats. Your task is to select the image you perceive as the most accurate or appealing for each object.
 
     **Confidentiality and Data Usage:**
-    Your responses will be recorded anonymously. No personally identifiable information will be collected. Aggregated data may be presented in academic publications or conferences.
+    Your responses will be recorded anonymously. No personally identifiable information will be collected. The data gathered will be used solely for research purposes and may be published in academic journals or conferences in an aggregated form.
 
     **Voluntary Participation:**
-    Your participation is entirely voluntary. You may withdraw at any time by closing your browser window.
+    Your participation is voluntary. You may withdraw from the study at any time by closing the browser window without any penalty.
 
     **Agreement:**
     By checking the box below, you acknowledge that you have read and understood the information provided above and agree to participate in this study.
     """
     st.markdown(consent_text)
-    consent_given = st.checkbox("I have read and understood the information above and agree to participate.")
+    consent_given = st.checkbox("I have read the above information and consent to participate in this study.")
 
     return consent_given
 
@@ -114,42 +112,46 @@ def load_image(image_path):
 # Function to convert image colors
 def convert_image_colors(image, color_space):
     if color_space == 'CMYK':
-        # Convert image to CMYK and back to RGB
-        cmyk_image = image.convert('CMYK')
-        return cmyk_image.convert('RGB')
-    elif color_space == 'Pantone':
-        # Simulate Pantone conversion
-        image = image.convert('P', palette=Image.ADAPTIVE, colors=20)
-        return image.convert('RGB')
+        # Convert image from sRGB to CMYK using ICC profiles
+        try:
+            # Paths to ICC profiles
+            srgb_profile = 'icc_profiles/sRGB_v4_ICC_preference.icc'  # sRGB profile
+            cmyk_profile = 'icc_profiles/APTEC_PC10_CardBoard_2023_v1.icc'  # CMYK profile
+
+            # Ensure image is in RGB mode
+            if image.mode != 'RGB':
+                image = image.convert('RGB')
+
+            # Convert from sRGB to CMYK
+            img_cmyk = ImageCms.profileToProfile(image, srgb_profile, cmyk_profile, outputMode='CMYK')
+            # Convert back to RGB for display
+            img_rgb = ImageCms.profileToProfile(img_cmyk, cmyk_profile, srgb_profile, outputMode='RGB')
+            return img_rgb
+        except Exception as e:
+            st.error(f"Error converting to CMYK: {e}")
+            return image
+    elif color_space == 'eciRGB v2':
+        # Convert image from sRGB to eciRGB v2
+        try:
+            # Paths to ICC profiles
+            srgb_profile = 'icc_profiles/sRGB_v4_ICC_preference.icc'
+            ecirgb_profile = 'icc_profiles/eciRGB_v2.icc'
+
+            # Ensure image is in RGB mode
+            if image.mode != 'RGB':
+                image = image.convert('RGB')
+
+            # Convert from sRGB to eciRGB v2
+            img_ecirgb = ImageCms.profileToProfile(image, srgb_profile, ecirgb_profile, outputMode='RGB')
+            return img_ecirgb
+        except Exception as e:
+            st.error(f"Error converting to eciRGB v2: {e}")
+            return image
     elif color_space == 'RGB':
         # No conversion needed
         return image
     else:
         return image
-
-# Function to record response
-def record_response(selected_idx):
-    # Ensure that st.session_state.responses is a list
-    if 'responses' not in st.session_state or not isinstance(st.session_state.responses, list):
-        st.session_state.responses = []
-
-    # Remove existing response for this task index if any (to prevent duplicates)
-    response_indices = [i for i, resp in enumerate(st.session_state.responses) if resp['task_index'] == st.session_state.current_task_index + 1]
-    for idx in sorted(response_indices, reverse=True):
-        del st.session_state.responses[idx]
-
-    # Add the new response
-    st.session_state.responses.append({
-        'user_id': st.session_state.user_id,
-        'task_index': st.session_state.current_task_index + 1,
-        'object': obj_image,
-        'repeat': repeat,
-        'selected_option': selected_idx + 1,  # Option number
-        'selected_color_space': color_spaces_shuffled[selected_idx],
-        'option_1_color_space': color_spaces_shuffled[0],
-        'option_2_color_space': color_spaces_shuffled[1],
-        'option_3_color_space': color_spaces_shuffled[2],
-    })
 
 # Consent Step
 if not st.session_state.consent_given:
@@ -164,12 +166,11 @@ if not st.session_state.consent_given:
 if st.session_state.consent_given:
     # Introduction text
     st.write("""
+    Welcome to the Nature's Palette study!
 
-    You're ready to begin!
-    
-    In this study, you will be presented with sets of images. Each set features variations in color formatting. Your task is to select the image from each set that you find most visually appealing. The images within each set will be presented in a random order.
+    In this study, you will see different visual representations of natural objects. Each object is displayed three times with different color formats shuffled randomly. Your task is to select the image you like the most each time.
 
-    Your responses will remain completely anonymous and will be used solely for research purposes.
+    Please note that your participation is anonymous, and your responses will be used solely for research purposes.
 
     Let's begin!
     """)
@@ -214,7 +215,7 @@ if st.session_state.consent_given:
             st.stop()
 
         # Generate different color versions
-        color_spaces = ['CMYK', 'Pantone', 'RGB']
+        color_spaces = ['CMYK', 'eciRGB v2', 'RGB']
 
         # Create variations with different color formats
         images_with_formats = []
@@ -254,7 +255,17 @@ if st.session_state.consent_given:
             st.stop()
 
         # Record the response
-        record_response(selected_idx)
+        st.session_state.responses.append({
+            'user_id': st.session_state.user_id,
+            'task_index': st.session_state.current_task_index + 1,
+            'object': obj_image,
+            'repeat': repeat,
+            'selected_option': selected_idx + 1,  # Option number
+            'selected_color_space': color_spaces_shuffled[selected_idx],
+            'option_1_color_space': color_spaces_shuffled[0],
+            'option_2_color_space': color_spaces_shuffled[1],
+            'option_3_color_space': color_spaces_shuffled[2],
+        })
 
         # Navigation buttons
         col1, col2 = st.columns(2)
