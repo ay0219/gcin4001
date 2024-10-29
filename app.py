@@ -353,8 +353,8 @@ if st.session_state.consent_given:
 
             # Load original image
             image_path = f'data/objects/{row["object"]}'
-            image = load_image(image_path)
-            if image is None:
+            original_image = load_image(image_path)
+            if original_image is None:
                 st.error(f"Could not load image {row['object']}.")
                 continue
 
@@ -368,23 +368,21 @@ if st.session_state.consent_given:
             # Generate images with corresponding color spaces
             images = []
             for cs in option_color_spaces:
-                img_converted = convert_image_colors(image, cs)
+                img_converted = convert_image_colors(original_image.copy(), cs)
                 images.append(img_converted)
 
             # Display images with selection indication
             cols = st.columns(3)
             for i, col in enumerate(cols):
                 with col:
-                    # Highlight selected image
+                    # Display image
+                    st.image(images[i], use_column_width=True)
+                    # Check if this option was selected
                     if (i + 1) == row['selected_option']:
-                        # Add a green border to the selected image
-                        border_color = 'green'
-                        img_with_border = ImageOps.expand(images[i], border=5, fill=border_color)
-                        st.markdown(f"<b>Option {i + 1} (Selected)</b>", unsafe_allow_html=True)
-                        st.image(img_with_border, use_column_width=True)
+                        # Use a checkmark emoji to indicate selected image
+                        st.markdown(f"**Option {i + 1} ✅**")
                     else:
                         st.markdown(f"Option {i + 1}")
-                        st.image(images[i], use_column_width=True)
 
         # Proceed with summary
         st.subheader("Summary of Your Preferences:")
