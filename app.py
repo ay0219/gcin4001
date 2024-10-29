@@ -232,40 +232,54 @@ if st.session_state.consent_given:
         captions = [f"Option {i+1}" for i in range(len(images))]
         color_spaces_shuffled = [cs for cs, _ in images_with_formats]
 
+        # Unique identifier for this task
+        task_id = f"{obj_image}_{repeat}"
+
+        # Retrieve previous selection if it exists
+        previous_response = st.session_state.responses.get(task_id, {})
+        previous_selected_color_space = previous_response.get('selected_color_space')
+
+        if previous_selected_color_space:
+            # Get the index of the previously selected color space
+            try:
+                default_index = color_spaces_shuffled.index(previous_selected_color_space)
+            except ValueError:
+                default_index = None
+        else:
+            default_index = None
+
         # Allow participant to select image by clicking on it
-        st.write("Take a moment to look closely at each image. Then, please select the one you prefer:")
+        st.write("Please select the image you like the most:")
         selected_idx = image_select(
             label="",
             images=images,
             captions=captions,
             return_value='index',
             use_container_width=True,
-            key=f"selection_{st.session_state.current_task_index}"
+            key=f"selection_{st.session_state.current_task_index}",
+            index=default_index  # Set default selection if it exists
         )
 
-        # Provide option to view each image separately without revealing color format
-        with st.expander("View Images in Full Size"):
-            for idx, img in enumerate(images):
-                st.subheader(f"Option {idx+1}")
-                st.image(img, use_column_width=True)
-
         # Ensure a selection is made
-        if selected_idx is None:
+        if selected_idx is not None:
+            # Record the response
+            def record_response(selected_idx):
+                # Update or add the response for this task
+                st.session_state.responses[task_id] = {
+                    'user_id': st.session_state.user_id,
+                    'task_index': st.session_state.current_task_index + 1,
+                    'object': obj_image,
+                    'repeat': repeat,
+                    'selected_option': selected_idx + 1,  # Option number
+                    'selected_color_space': color_spaces_shuffled[selected_idx],
+                    # Option mappings
+                    'options': [{'option_number': i+1, 'color_space': cs} for i, cs in enumerate(color_spaces_shuffled)],
+                }
+
+            record_response(selected_idx)
+        else:
             st.warning("Please make a selection before proceeding.")
             st.stop()
-
-        # Record the response
-        st.session_state.responses.append({
-            'user_id': st.session_state.user_id,
-            'task_index': st.session_state.current_task_index + 1,
-            'object': obj_image,
-            'repeat': repeat,
-            'selected_option': selected_idx + 1,  # Option number
-            'selected_color_space': color_spaces_shuffled[selected_idx],
-            'option_1_color_space': color_spaces_shuffled[0],
-            'option_2_color_space': color_spaces_shuffled[1],
-            'option_3_color_space': color_spaces_shuffled[2],
-        })
 
         # Navigation buttons
         col1, col2 = st.columns(2)
@@ -273,9 +287,6 @@ if st.session_state.consent_given:
             if st.session_state.current_task_index > 0:
                 if st.button("Previous"):
                     st.session_state.current_task_index -= 1
-                    # Remove the last response
-                    if st.session_state.responses:
-                        st.session_state.responses.pop()
                     st.rerun()
         with col2:
             if st.session_state.current_task_index < total_tasks - 1:
@@ -291,7 +302,7 @@ if st.session_state.consent_given:
                     st.balloons()
 
                     # Prepare responses DataFrame
-                    responses_df = pd.DataFrame(st.session_state.responses)
+                    responses_df = pd.DataFrame.from_dict(st.session_state.responses, orient='index')
 
                     # Clear session state after submission
                     st.session_state.clear()
@@ -339,7 +350,7 @@ if st.session_state.consent_given:
         st.balloons()
 
         # Prepare responses DataFrame
-        responses_df = pd.DataFrame(st.session_state.responses)
+        responses_df = pd.DataFrame.from_dict(st.session_state.responses, orient='index')
 
         # Clear session state after submission
         st.session_state.clear()
