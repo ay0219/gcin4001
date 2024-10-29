@@ -211,7 +211,7 @@ if st.session_state.consent_given:
         # Load original image
         image = load_image(f'data/objects/{obj_image}')
         if image is None:
-            st.error(f"Could not load image {obj_image}. Please contact the administrator.")
+            st.error(f"Could not load image {obj_image}. Please contact the Principal Investigator.")
             st.stop()
 
         # Generate different color versions
@@ -233,7 +233,7 @@ if st.session_state.consent_given:
         color_spaces_shuffled = [cs for cs, _ in images_with_formats]
 
         # Allow participant to select image by clicking on it
-        st.write("Please select the image you like the most:")
+        st.write("Take a moment to look closely at each image. Then, please select the one you prefer:")
         selected_idx = image_select(
             label="",
             images=images,
