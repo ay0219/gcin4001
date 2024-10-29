@@ -291,7 +291,7 @@ if st.session_state.consent_given:
                     st.balloons()
 
                     # Prepare responses DataFrame
-                    responses_df = pd.DataFrame.from_dict(st.session_state.responses, orient='index')
+                    responses_df = pd.DataFrame(st.session_state.responses)
 
                     # Clear session state after submission
                     st.session_state.clear()
@@ -300,7 +300,7 @@ if st.session_state.consent_given:
                     st.header("Your Selections and Preferences")
 
                     st.subheader("Your Selections:")
-                    st.dataframe(responses_df[['Trial Number', 'Object', 'Selected Color Space']], use_container_width=True)
+                    st.dataframe(responses_df[['task_index', 'object', 'repeat', 'selected_color_space']], use_container_width=True)
 
                     st.subheader("Summary of Your Preferences:")
                     preference_counts = responses_df['selected_color_space'].value_counts()
@@ -334,3 +334,51 @@ if st.session_state.consent_given:
                     )
 
                     st.stop()
+    else:
+        st.success("You have completed the study. Thank you for your participation!")
+        st.balloons()
+
+        # Prepare responses DataFrame
+        responses_df = pd.DataFrame(st.session_state.responses)
+
+        # Clear session state after submission
+        st.session_state.clear()
+
+        # Display participant's own data
+        st.header("Your Selections and Preferences")
+
+        st.subheader("Your Selections:")
+        st.dataframe(responses_df[['task_index', 'object', 'repeat', 'selected_color_space']], use_container_width=True)
+
+        st.subheader("Summary of Your Preferences:")
+        preference_counts = responses_df['selected_color_space'].value_counts()
+        fig, ax = plt.subplots(figsize=(10,6))
+        preference_counts.plot(kind='bar', ax=ax, color='skyblue')
+        ax.set_xlabel('Color Space')
+        ax.set_ylabel('Number of Selections')
+        ax.set_title('Your Color Space Preferences')
+        st.pyplot(fig)
+
+        # Save the chart to a buffer
+        buf = BytesIO()
+        fig.savefig(buf, format='png')
+        buf.seek(0)
+
+        # Provide download button for the chart image
+        st.download_button(
+            label="Download Chart as PNG",
+            data=buf,
+            file_name='your_preferences_chart.png',
+            mime='image/png',
+        )
+
+        # Provide download option for participant's own data
+        csv_data = responses_df.to_csv(index=False).encode('utf-8')
+        st.download_button(
+            label="Download Your Responses as CSV",
+            data=csv_data,
+            file_name='your_responses.csv',
+            mime='text/csv',
+        )
+
+        st.stop()
