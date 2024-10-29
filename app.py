@@ -227,122 +227,6 @@ if st.session_state.consent_given:
         rng = random.Random(str(st.session_state.user_id) + str(st.session_state.current_task_index))
         rng.shuffle(images_with_formats)
 
-        # Prepare images and captions for selection
-        images = [img for _, img in images_with_formats]
-        captions = [f"Option {i+1}" for i in range(len(images))]
-        color_spaces_shuffled = [cs for cs, _ in images_with_formats]
-
-        # Allow participant to select image by clicking on it
-        st.write("Please select the image you like the most:")
-        selected_idx = image_select(
-            label="",
-            images=images,
-            captions=captions,
-            return_value='index',
-            use_container_width=True,
-            key=f"selection_{st.session_state.current_task_index}"
-        )
-
-        # Provide option to view each image separately without revealing color format
-        with st.expander("View Images in Full Size"):
-            for idx, img in enumerate(images):
-                st.subheader(f"Option {idx+1}")
-                st.image(img, use_column_width=True)
-
-        # Ensure a selection is made
-        if selected_idx is None:
-            st.warning("Please make a selection before proceeding.")
-            st.stop()
-
-        # Record the response
-        record_response(selected_idx)
-
-        # Navigation buttons
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.session_state.current_task_index > 0:
-                if st.button("Previous"):
-                    st.session_state.current_task_index -= 1
-                    # Remove the last response
-                    if st.session_state.responses:
-                        st.session_state.responses.pop()
-                    st.rerun()
-        with col2:
-            if st.session_state.current_task_index < total_tasks - 1:
-                if st.button("Next"):
-                    st.session_state.current_task_index += 1
-                    st.rerun()
-            else:
-                if st.button("Submit"):
-                    # Save responses to Firestore
-                    save_responses_to_firestore(st.session_state.responses)
-
-                    st.success("You have completed the study. Thank you for your participation!")
-                    st.balloons()
-
-        # Prepare images and captions for selection
-        images = [img for _, img in images_with_formats]
-        captions = [f"Option {i+1}" for i in range(len(images))]
-        color_spaces_shuffled = [cs for cs, _ in images_with_formats]
-
-        # Allow participant to select image by clicking on it
-        st.write("Please select the image you like the most:")
-        selected_idx = image_select(
-            label="",
-            images=images,
-            captions=captions,
-            return_value='index',
-            use_container_width=True,
-            key=f"selection_{st.session_state.current_task_index}"
-        )
-
-        # Provide option to view each image separately without revealing color format
-        with st.expander("View Images in Full Size"):
-            for idx, img in enumerate(images):
-                st.subheader(f"Option {idx+1}")
-                st.image(img, use_column_width=True)
-
-        # Ensure a selection is made
-        if selected_idx is None:
-            st.warning("Please make a selection before proceeding.")
-            st.stop()
-
-        # Record the response
-        st.session_state.responses.append({
-            'user_id': st.session_state.user_id,
-            'task_index': st.session_state.current_task_index + 1,
-            'object': obj_image,
-            'repeat': repeat,
-            'selected_option': selected_idx + 1,  # Option number
-            'selected_color_space': color_spaces_shuffled[selected_idx],
-            'option_1_color_space': color_spaces_shuffled[0],
-            'option_2_color_space': color_spaces_shuffled[1],
-            'option_3_color_space': color_spaces_shuffled[2],
-        })
-
-        # Navigation buttons
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.session_state.current_task_index > 0:
-                if st.button("Previous"):
-                    st.session_state.current_task_index -= 1
-                    # Remove the last response
-                    if st.session_state.responses:
-                        st.session_state.responses.pop()
-                    st.rerun()
-        with col2:
-            if st.session_state.current_task_index < total_tasks - 1:
-                if st.button("Next"):
-                    st.session_state.current_task_index += 1
-                    st.rerun()
-            else:
-                if st.button("Submit"):
-                    # Save responses to Firestore
-                    save_responses_to_firestore(st.session_state.responses)
-
-                    st.success("You have completed the study. Thank you for your participation!")
-                    st.balloons()
-
                     # Prepare responses DataFrame
                     responses_df = pd.DataFrame(st.session_state.responses)
 
@@ -392,7 +276,7 @@ if st.session_state.consent_given:
         st.balloons()
 
         # Prepare responses DataFrame
-        responses_df = pd.DataFrame.from_dict(st.session_state.responses, orient='index')
+        responses_df = pd.DataFrame(st.session_state.responses)
 
         # Clear session state after submission
         st.session_state.clear()
