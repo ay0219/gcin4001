@@ -255,7 +255,17 @@ if st.session_state.consent_given:
             st.stop()
 
         # Record the response
-        record_response(selected_idx)
+        st.session_state.responses.append({
+            'user_id': st.session_state.user_id,
+            'task_index': st.session_state.current_task_index + 1,
+            'object': obj_image,
+            'repeat': repeat,
+            'selected_option': selected_idx + 1,  # Option number
+            'selected_color_space': color_spaces_shuffled[selected_idx],
+            'option_1_color_space': color_spaces_shuffled[0],
+            'option_2_color_space': color_spaces_shuffled[1],
+            'option_3_color_space': color_spaces_shuffled[2],
+        })
 
         # Navigation buttons
         col1, col2 = st.columns(2)
