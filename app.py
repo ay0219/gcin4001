@@ -5,7 +5,7 @@ import os
 import random
 import uuid
 import matplotlib.pyplot as plt
-from PIL import Image, ImageCms
+from PIL import Image, ImageCms, ImageOps
 from io import BytesIO
 
 from streamlit_image_select import image_select
