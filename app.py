@@ -367,8 +367,8 @@ if st.session_state.consent_given:
             data=buf,
             file_name='your_preferences_chart.png',
             mime='image/png',
-
+        )
         # Now clear session state
         st.session_state.clear()
-        )
+       
         st.stop()
