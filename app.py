@@ -255,17 +255,7 @@ if st.session_state.consent_given:
             st.stop()
 
         # Record the response
-        st.session_state.responses.append({
-            'user_id': st.session_state.user_id,
-            'task_index': st.session_state.current_task_index + 1,
-            'object': obj_image,
-            'repeat': repeat,
-            'selected_option': selected_idx + 1,  # Option number
-            'selected_color_space': color_spaces_shuffled[selected_idx],
-            'option_1_color_space': color_spaces_shuffled[0],
-            'option_2_color_space': color_spaces_shuffled[1],
-            'option_3_color_space': color_spaces_shuffled[2],
-        })
+        record_response(selected_idx)
 
         # Navigation buttons
         col1, col2 = st.columns(2)
@@ -273,9 +263,6 @@ if st.session_state.consent_given:
             if st.session_state.current_task_index > 0:
                 if st.button("Previous"):
                     st.session_state.current_task_index -= 1
-                    # Remove the last response
-                    if st.session_state.responses:
-                        st.session_state.responses.pop()
                     st.rerun()
         with col2:
             if st.session_state.current_task_index < total_tasks - 1:
@@ -293,7 +280,10 @@ if st.session_state.consent_given:
                     # Prepare responses DataFrame
                     responses_df = pd.DataFrame(st.session_state.responses)
 
-                    # Clear session state after submission
+                    # Remove duplicate entries per object and repeat
+                    responses_df = responses_df.drop_duplicates(subset=['object', 'repeat'], keep='last')
+
+                    # Clear session state after displaying data
                     st.session_state.clear()
 
                     # Display participant's own data
@@ -341,7 +331,10 @@ if st.session_state.consent_given:
         # Prepare responses DataFrame
         responses_df = pd.DataFrame(st.session_state.responses)
 
-        # Clear session state after submission
+        # Remove duplicate entries per object and repeat
+        responses_df = responses_df.drop_duplicates(subset=['object', 'repeat'], keep='last')
+
+        # Clear session state after displaying data
         st.session_state.clear()
 
         # Display participant's own data
