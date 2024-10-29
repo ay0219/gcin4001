@@ -339,7 +339,7 @@ if st.session_state.consent_given:
         st.balloons()
 
         # Prepare responses DataFrame
-        responses_df = pd.DataFrame.from_dict(st.session_state.responses, orient='index')
+        responses_df = pd.DataFrame(st.session_state.responses)
 
         # Clear session state after submission
         st.session_state.clear()
