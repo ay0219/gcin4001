@@ -263,6 +263,9 @@ if st.session_state.consent_given:
             if st.session_state.current_task_index > 0:
                 if st.button("Previous"):
                     st.session_state.current_task_index -= 1
+                    # Remove the last response
+                    if st.session_state.responses:
+                        st.session_state.responses.pop()
                     st.rerun()
         with col2:
             if st.session_state.current_task_index < total_tasks - 1:
@@ -280,10 +283,7 @@ if st.session_state.consent_given:
                     # Prepare responses DataFrame
                     responses_df = pd.DataFrame(st.session_state.responses)
 
-                    # Remove duplicate entries per object and repeat
-                    responses_df = responses_df.drop_duplicates(subset=['object', 'repeat'], keep='last')
-
-                    # Clear session state after displaying data
+                    # Clear session state after submission
                     st.session_state.clear()
 
                     # Display participant's own data
@@ -331,10 +331,7 @@ if st.session_state.consent_given:
         # Prepare responses DataFrame
         responses_df = pd.DataFrame(st.session_state.responses)
 
-        # Remove duplicate entries per object and repeat
-        responses_df = responses_df.drop_duplicates(subset=['object', 'repeat'], keep='last')
-
-        # Clear session state after displaying data
+        # Clear session state after submission
         st.session_state.clear()
 
         # Display participant's own data
